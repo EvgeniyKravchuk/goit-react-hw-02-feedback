@@ -1,45 +1,52 @@
-import { Component } from "react";
-import ButtonsData from "./componentsData/Statistics.json";
-import {
-  Wrapper,
-  Title,
-  Button,
-  Undertitle,
-  StatsList,
-  StatsItem,
-} from "./components/Statistics/Statistics.jsx";
+import React, { Component } from "react";
+import "./App.module.css";
+import Buttons from "./components/buttons/Buttons";
+import Feedback from "./components/feedback/Feedback";
+import { Wrapper, Title } from "./components/generalComponents/general.styled";
 
-class App extends Component {
+export default class App extends Component {
   state = {
     good: 0,
     neutral: 0,
     bad: 0,
   };
 
-  onRateButtonClick = ({ currentTarget }) => {
+  handleClick = (evt) => {
+    const { name } = evt.target;
     this.setState((prevState) => ({
-      [currentTarget.id]: prevState[currentTarget.id] + 1,
+      [name]: prevState[name] + 1,
     }));
+  };
+
+  countTotalFeedback = () => {
+    const stateValues = Object.values(this.state);
+    const total = stateValues.reduce((previous, current) => previous + current);
+    return total;
+  };
+
+  countPositiveFeedbackPercentage = () => {
+    const { good } = this.state;
+    const total = this.countTotalFeedback();
+    const percentage = (good / total) * 100;
+
+    if (!total) {
+      return 0;
+    }
+
+    return percentage.toFixed();
   };
 
   render() {
     return (
       <Wrapper>
-        <Title>Пожалуйста, оставьте Вашу оценку:</Title>
-        {ButtonsData.map(({ id, name }) => (
-          <Button key={id} id={id} onClick={this.onRateButtonClick}>
-            {name}
-          </Button>
-        ))}
-        <Undertitle>Статистика:</Undertitle>
-        <StatsList>
-          {ButtonsData.map(({ id, name }) => (
-            <StatsItem key={id}>{name + ": " + this.state[id]}</StatsItem>
-          ))}
-        </StatsList>
+        <Title>Feedbacks</Title>
+        <Buttons state={this.state} onClick={this.handleClick} />
+        <Feedback
+          state={this.state}
+          total={this.countTotalFeedback}
+          percentage={this.countPositiveFeedbackPercentage}
+        />
       </Wrapper>
     );
   }
 }
-
-export default App;
